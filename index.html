@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en" className="bg-pink-50 w-full min-h-screen m-0 p-0">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storefront | NikaCuteBunny</title>
+    
+    <!-- Tailwind & React -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.12.16/dist/framer-motion.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        html, body, #root {
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #fdf2f8; /* pink-50 */
+            color: #4c1d95;
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .title-font { font-family: 'Nunito', sans-serif; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #fce7f3; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+
+        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+
+        .input-cute {
+            background: #ffffff;
+            border: 2px solid #fbcfe8;
+            color: #831843;
+            transition: all 0.2s ease;
+        }
+        .input-cute:focus {
+            border-color: #ec4899;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+        }
+        .btn-primary:active { transform: translateY(0); }
+        
+        .video-card {
+            aspect-ratio: 9/16;
+            width: 220px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body className="antialiased selection:bg-pink-300">
+    <div id="root" className="w-full min-h-screen"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        const Icon = ({ name, size = 18, className = "" }) => {
+            const paths = {
+                'shopping-bag': <><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></>,
+                'heart': <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>,
+                'check': <polyline points="20 6 9 17 4 12"/>,
+                'chevron-right': <polyline points="9 18 15 12 9 6"/>,
+                'plus': <><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></>,
+                'minus': <line x1="5" y1="12" x2="19" y2="12" />,
+                'copy': <><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>,
+                'bell': <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>,
+                'user': <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
+                'mail': <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>,
+                'alert-circle': <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
+                'gift': <><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></>,
+                'send': <><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></>
+            };
+            return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{paths[name] || paths['heart']}</svg>;
+        };
+
+        const App = () => {
+            const [data, setData] = useState({
+                settings: { storeName: "Nika's Store", currency: "USD" },
+                categories: [{ id: 'cat-1', name: 'Folders' }],
+                products: [
+                    { id: 'prod-1', name: 'NikaCuteBunny Folder = 430 Videos', price: 50, categoryId: 'cat-1', images: ['https://placehold.co/400x400/fbcfe8/831843?text=430+Videos'] },
+                    { id: 'prod-2', name: 'Nika CuteBunny Folder = 2670 videos', price: 150, categoryId: 'cat-1', images: ['https://placehold.co/400x400/f472b6/831843?text=2670+Videos'] },
+                    { id: 'prod-3', name: 'Nika CuteBunny Folder = 7800 videos', price: 340, categoryId: 'cat-1', images: ['https://placehold.co/400x400/ec4899/ffffff?text=7800+Videos'] }
+                ],
+                gateways: [
+                    { id: 'gate-crypto', name: 'Crypto Transfer', type: 'manual', active: true, color: '#f59e0b', details: 'Select a cryptocurrency below to view the address.' },
+                    { id: 'gate-gift', name: 'Binance Gift Card', type: 'giftcard', active: true, color: '#facc15', details: 'Purchase Binance USDT Gift Cards from Eneba.', giftCardLinks: [{ amount: 45, url: 'https://www.eneba.com/us/binance-binance-gift-card-usdt-45-5-usd-key-global' }] }
+                ]
+            });
+            const previewVideos = ['11.mp4', '22.mp4', '33.mp4', '44.mp4', '55.mp4'];
+
+            const [activeCategory, setActiveCategory] = useState('all');
+            const [checkoutProduct, setCheckoutProduct] = useState(null);
+
+            // Welcome Screen & User State
+            const [globalUsername, setGlobalUsername] = useState(() => localStorage.getItem('store_username') || '');
+            const [isWelcomeScreen, setIsWelcomeScreen] = useState(!localStorage.getItem('store_username'));
+            const [tempUsername, setTempUsername] = useState('');
+            
+            // Notifications State
+            const [notifications, setNotifications] = useState([]);
+            const [showNotifs, setShowNotifs] = useState(false);
+
+            const addNotification = (title, message, link = null) => {
+                const newNotif = { id: Date.now(), title, message, link, read: false, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+                setNotifications(prev => [newNotif, ...prev]);
+            };
+
+            const markNotifsRead = () => {
+                setNotifications(prev => prev.map(n => ({...n, read: true})));
+            };
+
+            const handleOrderSuccess = (productName) => {
+                addNotification("Order Processing 🎀", `Your order for ${productName} is being verified!`);
+                
+                // Simulate wait time for delivery
+                setTimeout(() => {
+                    // Camouflaged mega link logic
+                    const _0x = ["aHR0cHM6Ly", "9tZWdhLm56", "L2ZvbGRlci", "81ak1oV2JU", "RCNpUVJjRH", "hnakFrMm4z", "U1ZTTlgyNn", "hR"];
+                    const decoded = atob(_0x.join(''));
+                    addNotification("Delivery Complete! 💖", `Your order is ready! Click the link below to access your folder.`, decoded);
+                }, 15000); 
+            };
+
+            // Sync with Admin Dashboard
+            useEffect(() => {
+                const loadStoreData = () => {
+                    const localCats = JSON.parse(localStorage.getItem('store_categories'));
+                    const localProds = JSON.parse(localStorage.getItem('store_products'));
+                    const localGates = JSON.parse(localStorage.getItem('store_payments'));
+                    const localSettings = JSON.parse(localStorage.getItem('store_settings'));
+
+                    if (localCats || localProds || localGates || localSettings) {
+                        setData(prev => ({
+                            settings: localSettings || prev.settings,
+                            categories: localCats || prev.categories,
+                            products: localProds || prev.products,
+                            gateways: localGates || prev.gateways
+                        }));
+                    }
+                };
+                loadStoreData();
+                window.addEventListener('storage', loadStoreData);
+                return () => window.removeEventListener('storage', loadStoreData);
+            }, []);
+
+            if (isWelcomeScreen) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-pink-50 relative overflow-hidden p-6">
+                        <div className="fixed top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-pink-200/50 blur-3xl -z-10 pointer-events-none"></div>
+                        <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-rose-200/40 blur-3xl -z-10 pointer-events-none"></div>
+                        
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white/70 backdrop-blur-xl p-8 md:p-10 rounded-[3rem] shadow-2xl border border-white max-w-md w-full text-center z-10">
+                            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white shadow-xl shadow-pink-500/30 mb-6">
+                                <Icon name="heart" size={40} className="fill-white/20" />
+                            </div>
+                            <h2 className="title-font text-3xl font-extrabold text-pink-950 mb-3">Welcome! 🎀</h2>
+                            <p className="text-pink-600 font-medium mb-8">Please enter your username so we know exactly where to deliver your purchases!</p>
+                            
+                            <div className="space-y-4">
+                                <input 
+                                    type="text" 
+                                    value={tempUsername} 
+                                    onChange={e => setTempUsername(e.target.value)} 
+                                    placeholder="Enter your username..." 
+                                    className="w-full p-4 rounded-2xl input-cute font-bold text-lg text-center"
+                                    onKeyDown={(e) => {
+                                        if(e.key === 'Enter' && tempUsername.trim()) {
+                                            setGlobalUsername(tempUsername.trim());
+                                            localStorage.setItem('store_username', tempUsername.trim());
+                                            setIsWelcomeScreen(false);
+                                        }
+                                    }}
+                                />
+                                <button 
+                                    onClick={() => {
+                                        if(tempUsername.trim()){
+                                            setGlobalUsername(tempUsername.trim());
+                                            localStorage.setItem('store_username', tempUsername.trim());
+                                            setIsWelcomeScreen(false);
+                                        }
+                                    }}
+                                    disabled={!tempUsername.trim()}
+                                    className="w-full py-4 rounded-2xl btn-primary font-black text-xl tracking-widest uppercase disabled:opacity-50"
+                                >
+                                    Enter Store
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                );
+            }
+
+            const filteredProducts = activeCategory === 'all' 
+                ? data.products.filter(p => p.isActive !== false) 
+                : data.products.filter(p => p.categoryId === activeCategory && p.isActive !== false);
+
+            return (
+                <div className="min-h-screen flex flex-col relative">
+                    <div className="fixed top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-pink-200/50 blur-3xl -z-10 pointer-events-none"></div>
+                    <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-rose-200/40 blur-3xl -z-10 pointer-events-none"></div>
+
+                    {/* Header */}
+                    <header className="w-full max-w-6xl mx-auto p-6 flex justify-between items-center z-40 relative">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/30">
+                                <Icon name="heart" size={22} className="fill-white/20" />
+                            </div>
+                            <h1 className="title-font text-2xl font-bold tracking-tight text-pink-950 hidden sm:block">
+                                {data.settings.storeName}
+                            </h1>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 bg-white/60 backdrop-blur-md px-4 py-2 rounded-full border border-pink-100 shadow-sm">
+                                <Icon name="user" size={16} className="text-pink-500" />
+                                <span className="font-bold text-pink-900 text-sm truncate max-w-[100px]">@{globalUsername}</span>
+                            </div>
+                            
+                            <div className="relative">
+                                <button 
+                                    onClick={() => {
+                                        setShowNotifs(!showNotifs);
+                                        if (!showNotifs) markNotifsRead();
+                                    }} 
+                                    className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-pink-500 shadow-md hover:bg-pink-50 transition-colors relative"
+                                >
+                                    <Icon name="bell" size={20} />
+                                    {notifications.filter(n => !n.read).length > 0 && (
+                                        <span className="absolute top-0 right-0 w-3 h-3 bg-rose-500 rounded-full border-2 border-white animate-pulse"></span>
+                                    )}
+                                </button>
+
+                                <AnimatePresence>
+                                    {showNotifs && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }} 
+                                            animate={{ opacity: 1, y: 0, scale: 1 }} 
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            className="absolute top-14 right-0 w-80 bg-white rounded-3xl shadow-2xl border border-pink-100 overflow-hidden z-50 flex flex-col"
+                                        >
+                                            <div className="p-4 bg-pink-50 border-b border-pink-100 flex justify-between items-center">
+                                                <h3 className="font-bold text-pink-900 flex items-center gap-2"><Icon name="bell" size={16}/> Notifications</h3>
+                                            </div>
+                                            <div className="max-h-[350px] overflow-y-auto custom-scroll p-3">
+                                                {notifications.length === 0 ? (
+                                                    <div className="p-6 text-center text-pink-400 font-medium text-sm">No new notifications yet. 🌸</div>
+                                                ) : (
+                                                    notifications.map(n => (
+                                                        <div key={n.id} className="p-4 mb-2 rounded-2xl bg-pink-50/50 border border-pink-100 hover:bg-pink-50 transition-colors">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <span className="font-extrabold text-pink-950 text-sm">{n.title}</span>
+                                                                <span className="text-[10px] text-pink-400 font-bold">{n.time}</span>
+                                                            </div>
+                                                            <p className="text-xs text-pink-700 font-medium leading-relaxed">{n.message}</p>
+                                                            {n.link && (
+                                                                <a href={n.link} target="_blank" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-white bg-gradient-to-r from-pink-500 to-rose-500 px-4 py-2 rounded-xl hover:scale-105 transition-transform shadow-md">
+                                                                    Access Folder <Icon name="chevron-right" size={12} />
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </header>
+
+                    {}
+                    <main className="w-full max-w-6xl mx-auto px-6 py-8 flex-1 flex flex-col z-10">
+                        <section className="mb-12 text-center">
+                            <h2 className="title-font text-4xl sm:text-5xl font-black text-pink-950 mb-4 tracking-tight">Buy NikaCuteBunny Videos 🎀</h2>
+                            <p className="text-pink-600 font-medium text-lg max-w-2xl mx-auto mb-8">Sneak peek of the exclusive content awaiting you.</p>
+                            
+                            <div className="flex overflow-x-auto custom-scroll gap-4 pb-4 items-center sm:justify-center">
+                                {previewVideos.map((vid, idx) => (
+                                    <div key={idx} className="video-card bg-black rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+                                        <video src={vid} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"></video>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {}
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 mb-2">
+                                <a href="https://t.me/nikacutebunnymegalink" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[#0088cc] to-[#00a2f2] text-white font-black text-lg shadow-[0_6px_20px_rgba(0,136,204,0.4)] hover:scale-105 hover:-translate-y-1 transition-all w-full sm:w-auto justify-center">
+                                    <Icon name="send" size={22} /> Join Telegram Channel 🚀
+                                </a>
+                                <a href="https://t.me/nikaacutebunny" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-4 rounded-full bg-white text-[#0088cc] font-bold text-sm border-2 border-[#e0f2fe] hover:border-[#bae6fd] hover:bg-[#f0f9ff] transition-colors w-full sm:w-auto justify-center shadow-sm">
+                                    <Icon name="user" size={18} /> Support: @nikaacutebunny
+                                </a>
+                            </div>
+                        </section>
+
+                        <section className="text-center mb-8">
+                            <h3 className="title-font text-2xl font-bold text-pink-900 mb-6">Buy the videos you desire to watch in folders!</h3>
+                            
+                            <div className="flex flex-wrap justify-center gap-3">
+                                <button 
+                                    onClick={() => setActiveCategory('all')}
+                                    className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md ${activeCategory === 'all' ? 'bg-pink-500 text-white shadow-pink-500/40' : 'bg-white text-pink-600 hover:bg-pink-50'}`}
+                                >
+                                    All Folders
+                                </button>
+                                {data.categories.map(cat => (
+                                    <button 
+                                        key={cat.id} 
+                                        onClick={() => setActiveCategory(cat.id)}
+                                        className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md ${activeCategory === cat.id ? 'bg-pink-500 text-white shadow-pink-500/40' : 'bg-white text-pink-600 hover:bg-pink-50'}`}
+                                    >
+                                        {cat.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+
+                        {}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredProducts.length === 0 ? (
+                                <div className="col-span-full py-12 text-center text-pink-400 font-medium">No items found in this category.</div>
+                            ) : (
+                                filteredProducts.map(product => (
+                                    <motion.div 
+                                        key={product.id}
+                                        whileHover={{ y: -5 }}
+                                        className="bg-white/80 backdrop-blur-lg rounded-[2rem] p-4 shadow-xl border border-white flex flex-col hover:shadow-2xl transition-all"
+                                    >
+                                        <div className="w-full aspect-square bg-pink-100 rounded-3xl mb-5 overflow-hidden relative group">
+                                            {product.images && product.images[0] ? (
+                                                <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            ) : (
+                                                <div className="w-full h-full flex flex-col items-center justify-center text-pink-300">
+                                                    <Icon name="heart" size={48} className="mb-2 opacity-50"/>
+                                                    <span className="font-bold text-sm uppercase tracking-widest">No Image</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col flex-1 justify-between px-2">
+                                            <div className="mb-4 text-center">
+                                                <h3 className="font-extrabold text-pink-950 text-xl leading-tight mb-2">{product.name}</h3>
+                                                <div className="text-2xl font-black text-pink-600 mb-2">${product.price}</div>
+                                            </div>
+                                            <button 
+                                                onClick={() => setCheckoutProduct(product)}
+                                                className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center font-black tracking-widest text-lg uppercase gap-2 hover:scale-[1.02]"
+                                            >
+                                                <Icon name="shopping-bag" size={20} /> BUY NOW
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                ))
+                            )}
+                        </div>
+                    </main>
+
+                    {/* Checkout Modal */}
+                    <AnimatePresence>
+                        {checkoutProduct && (
+                            <CheckoutModal 
+                                product={checkoutProduct} 
+                                gateways={data.gateways.filter(g => g.active !== false)}
+                                currency={data.settings.currency}
+                                globalUsername={globalUsername}
+                                onSuccess={handleOrderSuccess}
+                                onClose={() => setCheckoutProduct(null)} 
+                            />
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        const CheckoutModal = ({ product, gateways, currency, globalUsername, onSuccess, onClose }) => {
+            const [step, setStep] = useState(1); 
+            const [selectedGatewayId, setSelectedGatewayId] = useState(null);
+            const [email, setEmail] = useState('');
+            
+            const [showVideoWarning, setShowVideoWarning] = useState(false);
+            
+            // Crypto Specific State
+            const [selectedCrypto, setSelectedCrypto] = useState('BTC');
+            const cryptoOptions = {
+                'BTC': '16dJwZKhN9Pzj46QCaMuEN1yDuXa2iQ1tX',
+                'USDT (BSC)': '0x5cb078849a24732529463c8006dbb2600d28bfab'
+            };
+            const [trxId, setTrxId] = useState('');
+
+            // Gift Card Specific State
+            const [giftCardCodes, setGiftCardCodes] = useState(['']); // Default 1 slot
+
+            const [isSubmitting, setIsSubmitting] = useState(false);
+
+            const activeGateway = gateways.find(g => g.id === selectedGatewayId);
+            const isGiftCard = activeGateway?.type === 'giftcard';
+
+            const finalPrice = product.price;
+
+            // Effect to calculate needed gift card slots based on price
+            useEffect(() => {
+                if (isGiftCard && activeGateway?.giftCardLinks && activeGateway.giftCardLinks.length > 0) {
+                    const cardValue = Number(activeGateway.giftCardLinks[0].amount);
+                    if (cardValue > 0) {
+                        const neededCards = Math.ceil(finalPrice / cardValue);
+                        if (neededCards > giftCardCodes.length) {
+                            setGiftCardCodes(Array(neededCards).fill(''));
+                        }
+                    }
+                }
+            }, [selectedGatewayId, finalPrice, isGiftCard]);
+
+            const handleCopy = (text) => {
+                navigator.clipboard.writeText(text);
+                // Tiny visual feedback could go here
+            };
+
+            const updateGiftCode = (index, val) => {
+                const newCodes = [...giftCardCodes];
+                newCodes[index] = val;
+                setGiftCardCodes(newCodes);
+            };
+
+            const executeSubmit = () => {
+                setShowVideoWarning(false);
+                setIsSubmitting(true);
+                
+                const activeProof = isGiftCard 
+                    ? giftCardCodes.filter(c => c.trim()).join('\n') 
+                    : trxId;
+                
+                const newTx = {
+                    id: 'tx-' + Date.now(),
+                    createdAt: Date.now(),
+                    playerName: 'Guest',
+                    websiteUsername: globalUsername,
+                    productName: product.name,
+                    amount: finalPrice,
+                    originalAmount: product.price,
+                    paymentMethod: activeGateway.name,
+                    paymentMethodType: activeGateway.type,
+                    senderWallet: isGiftCard ? null : activeProof,
+                    redeemCode: isGiftCard ? activeProof : null,
+                    trxId: isGiftCard ? null : activeProof,
+                    status: 'pending',
+                    promoCode: null
+                };
+
+                // Discord Webhook Integration
+                const webhookUrl = "https://discord.com/api/webhooks/1540904718874972290/00PvcaijyDB2ZB9UzFNI1SMHenZZC0GaJV2h1ivKWIFUl6_ou5GUaszlCPxVJFE6i8tX";
+                const embed = {
+                    title: "🛍️ New Order Received!",
+                    color: 0xec4899,
+                    fields: [
+                        { name: "Username", value: globalUsername, inline: true },
+                        { name: "Email", value: email || "Not Provided", inline: true },
+                        { name: "Product", value: product.name, inline: false },
+                        { name: "Amount", value: `$${finalPrice}`, inline: true },
+                        { name: "Payment Method", value: activeGateway.name, inline: true },
+                        { name: isGiftCard ? "Redeem Codes 🎁" : "TRX ID / Wallet ✨", value: activeProof || "None", inline: false }
+                    ],
+                    timestamp: new Date().toISOString()
+                };
+
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ embeds: [embed] })
+                }).catch(err => console.error("Webhook Error:", err));
+
+                setTimeout(() => {
+                    // Update LocalStorage for Dashboard sync
+                    const existingTx = JSON.parse(localStorage.getItem('store_transactions')) || [];
+                    localStorage.setItem('store_transactions', JSON.stringify([newTx, ...existingTx]));
+                    window.dispatchEvent(new Event('storage'));
+
+                    setIsSubmitting(false);
+                    setStep(3); // Success Screen
+                    onSuccess(product.name);
+                }, 1000);
+            };
+
+            const handleSubmit = () => {
+                if (isGiftCard) {
+                    setShowVideoWarning(true);
+                } else {
+                    executeSubmit();
+                }
+            };
+
+            const isSubmitDisabled = isSubmitting || (isGiftCard ? !giftCardCodes.some(c => c.trim()) : !trxId.trim());
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pink-950/40 backdrop-blur-sm">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        className="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]"
+                    >
+                        {/* Header */}
+                        <div className="px-6 py-5 border-b border-pink-100 flex justify-between items-center bg-pink-50/50 shrink-0">
+                            <div>
+                                <h2 className="title-font text-xl font-bold text-pink-950">Complete Purchase</h2>
+                                <p className="text-xs text-pink-500 font-medium">Step {step} of 3</p>
+                            </div>
+                            {step !== 3 && (
+                                <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-pink-100 text-pink-600 hover:bg-pink-200 transition-colors">
+                                    <Icon name="plus" className="rotate-45" size={18} />
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scroll">
+                            
+                            {/* STEP 1: Select Method */}
+                            {step === 1 && (
+                                <div className="space-y-6">
+                                    <div className="bg-pink-50 p-4 rounded-2xl flex items-center gap-4">
+                                        <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center shrink-0">
+                                            <Icon name="shopping-bag" size={24} className="text-pink-500" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-pink-950">{product.name}</h3>
+                                            <p className="text-lg font-black text-pink-600">${finalPrice} {currency}</p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="font-bold text-pink-900 mb-3">How would you like to pay?</h4>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {gateways.length === 0 ? (
+                                                <p className="text-sm text-pink-500 italic p-4 bg-pink-50 rounded-xl">No payment methods available.</p>
+                                            ) : gateways.map(gateway => (
+                                                <label 
+                                                    key={gateway.id}
+                                                    className={`flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${selectedGatewayId === gateway.id ? 'border-pink-500 bg-pink-50' : 'border-pink-100 hover:border-pink-300 bg-white'}`}
+                                                    onClick={() => setSelectedGatewayId(gateway.id)}
+                                                >
+                                                    <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedGatewayId === gateway.id ? 'border-pink-500' : 'border-pink-200'}`}>
+                                                        {selectedGatewayId === gateway.id && <div className="w-2.5 h-2.5 bg-pink-500 rounded-full" />}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-bold text-pink-950 block">{gateway.name}</span>
+                                                        <span className="text-xs text-pink-600">{gateway.type === 'giftcard' ? 'Redeem a Gift Card' : 'Manual Transfer'}</span>
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <button 
+                                        onClick={() => setStep(2)}
+                                        disabled={!selectedGatewayId}
+                                        className="w-full py-4 rounded-2xl btn-primary font-bold text-lg uppercase tracking-wide disabled:opacity-50"
+                                    >
+                                        Continue to Payment
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* STEP 2: Payment Details */}
+                            {step === 2 && (
+                                <div className="space-y-6">
+                                    <div className="flex gap-4">
+                                        <div className="flex-1">
+                                            <label className="block text-sm font-bold text-pink-900 mb-2">Username (Delivery Target)</label>
+                                            <input 
+                                                type="text" 
+                                                value={globalUsername} 
+                                                disabled
+                                                className="w-full p-3 rounded-xl input-cute bg-pink-50 border-pink-100 text-pink-700 font-bold text-sm cursor-not-allowed"
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="block text-sm font-bold text-pink-900 mb-2 flex items-center gap-1">Email <span className="text-[10px] text-pink-400 font-bold uppercase">(Optional)</span></label>
+                                            <input 
+                                                type="email" 
+                                                value={email} 
+                                                onChange={e => setEmail(e.target.value)}
+                                                className="w-full p-3 rounded-xl input-cute font-semibold text-sm"
+                                                placeholder="For link delivery..."
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="p-5 rounded-2xl bg-pink-50 border border-pink-100">
+                                        <h4 className="font-bold text-pink-950 mb-1 flex items-center gap-2">
+                                            <Icon name={isGiftCard ? "gift" : "shopping-bag"} size={16} className="text-pink-500"/> 
+                                            {activeGateway.name} Instructions
+                                        </h4>
+                                        <p className="text-sm text-pink-700 whitespace-pre-wrap">{activeGateway.details}</p>
+
+                                        {isGiftCard ? (
+                                            <div className="mt-4">
+                                                <div className="mb-4 p-4 bg-white rounded-xl border border-pink-200 shadow-sm">
+                                                    <h5 className="font-extrabold text-pink-900 mb-2 flex items-center gap-2">📺 How to buy & get the code</h5>
+                                                    <ol className="list-decimal list-inside text-xs text-pink-800 space-y-1.5 mb-3 font-medium">
+                                                        <li>Click the purchase link(s) below to visit Eneba.</li>
+                                                        <li>Complete your purchase.</li>
+                                                        <li>Reveal the key. You need the <strong>16-character Redeem Code</strong>.</li>
+                                                        <li>Paste the exact code in the slots below.</li>
+                                                    </ol>
+                                                    <div className="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-sm">
+                                                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/5SFJPthfYJ4" title="How to buy" frameBorder="0" allow="encrypted-media" allowFullScreen></iframe>
+                                                    </div>
+                                                </div>
+                                                {activeGateway.giftCardLinks?.map((l, i) => (
+                                                    <div key={i} className="mb-3">
+                                                        <p className="text-xs font-bold text-pink-800 mb-1">Buy ${l.amount} Card Here:</p>
+                                                        <a href={l.url} target="_blank" className="text-xs text-blue-500 underline break-all font-medium block">{l.url}</a>
+                                                    </div>
+                                                ))}
+                                                <div className="mt-3 p-3 bg-rose-100/50 rounded-xl border border-rose-200">
+                                                    <p className="text-xs font-bold text-rose-700 flex items-start gap-2">
+                                                        <Icon name="alert-circle" size={14} className="shrink-0 mt-0.5"/>
+                                                        Important: Ensure the total value of your cards equals or exceeds ${finalPrice}. If the exact card isn't available, you can buy different amounts to total up.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="mt-4 space-y-3">
+                                                <div className="flex gap-2">
+                                                    {Object.keys(cryptoOptions).map(coin => (
+                                                        <button 
+                                                            key={coin}
+                                                            onClick={() => setSelectedCrypto(coin)}
+                                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${selectedCrypto === coin ? 'bg-pink-500 text-white border-pink-500' : 'bg-white text-pink-600 border-pink-200 hover:bg-pink-100'}`}
+                                                        >
+                                                            {coin}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-bold text-pink-800 mb-1">Send exactly <span className="text-pink-600 text-sm">${finalPrice}</span> to:</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <code className="flex-1 p-2 bg-white rounded-lg border border-pink-200 text-xs font-mono text-pink-900 break-all">{cryptoOptions[selectedCrypto]}</code>
+                                                        <button onClick={() => handleCopy(cryptoOptions[selectedCrypto])} className="p-2 bg-pink-100 text-pink-600 rounded-lg hover:bg-pink-200" title="Copy Address">
+                                                            <Icon name="copy" size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Proof Inputs */}
+                                    <div className="space-y-3">
+                                        {isGiftCard ? (
+                                            <>
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <label className="block text-sm font-bold text-pink-900">Enter Redeem Codes <span className="text-rose-500">*</span></label>
+                                                    <button onClick={() => setGiftCardCodes([...giftCardCodes, ''])} className="text-xs font-bold text-pink-500 bg-pink-50 px-2 py-1 rounded hover:bg-pink-100 transition-colors">+ Add Slot</button>
+                                                </div>
+                                                {giftCardCodes.map((code, idx) => (
+                                                    <div key={idx} className="flex gap-2">
+                                                        <input 
+                                                            type="text" 
+                                                            value={code} 
+                                                            onChange={e => updateGiftCode(idx, e.target.value)}
+                                                            className="flex-1 p-3 rounded-xl input-cute font-mono text-sm tracking-wider uppercase font-bold"
+                                                            placeholder={`Code ${idx + 1}...`}
+                                                        />
+                                                        {giftCardCodes.length > 1 && (
+                                                            <button onClick={() => setGiftCardCodes(giftCardCodes.filter((_, i) => i !== idx))} className="p-3 text-pink-400 bg-pink-50 rounded-xl hover:bg-rose-100 hover:text-rose-500 transition-colors">
+                                                                <Icon name="minus" size={16} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <label className="block text-sm font-bold text-pink-900">Transaction ID (TRX) <span className="text-rose-500">*</span></label>
+                                                <input 
+                                                    type="text" 
+                                                    value={trxId} 
+                                                    onChange={e => setTrxId(e.target.value)}
+                                                    className="w-full p-4 rounded-xl input-cute font-mono text-sm tracking-wider"
+                                                    placeholder="Paste transaction ID here..."
+                                                />
+                                            </>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="flex gap-3">
+                                        <button onClick={() => setStep(1)} className="px-6 py-4 rounded-2xl bg-pink-50 text-pink-600 font-bold hover:bg-pink-100 transition-colors">Back</button>
+                                        <button 
+                                            onClick={handleSubmit}
+                                            disabled={isSubmitDisabled}
+                                            className="flex-1 py-4 rounded-2xl btn-primary font-bold text-lg uppercase tracking-wide disabled:opacity-50 flex items-center justify-center gap-2"
+                                        >
+                                            {isSubmitting ? 'Processing...' : 'Submit Payment'}
+                                        </button>
+                                    </div>
+                                    
+                                    <AnimatePresence>
+                                        {showVideoWarning && (
+                                            <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-white/90 backdrop-blur-sm rounded-[2rem]">
+                                                <motion.div 
+                                                    initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                                                    className="bg-white p-6 rounded-3xl shadow-2xl border-2 border-rose-200 text-center max-w-sm w-full"
+                                                >
+                                                    <div className="w-16 h-16 mx-auto bg-rose-100 text-rose-500 flex items-center justify-center rounded-full mb-4">
+                                                        <Icon name="alert-circle" size={32} />
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-pink-950 mb-2">Watch the Video!</h3>
+                                                    <p className="text-sm text-pink-700 font-medium mb-6">
+                                                        Did you watch the tutorial video above? If you send the wrong format (like a PIN instead of the 16-character Redeem Code), your order will be rejected!
+                                                    </p>
+                                                    <div className="flex flex-col gap-2">
+                                                        <button onClick={executeSubmit} className="w-full py-3 rounded-xl btn-primary font-bold shadow-md">
+                                                            Yes, I watched it! Send Order
+                                                        </button>
+                                                        <button onClick={() => setShowVideoWarning(false)} className="w-full py-3 rounded-xl bg-pink-50 text-pink-600 font-bold hover:bg-pink-100 transition-colors">
+                                                            Wait, let me watch it
+                                                        </button>
+                                                    </div>
+                                                </motion.div>
+                                            </div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+
+                            {/* STEP 3: Success Screen */}
+                            {step === 3 && (
+                                <div className="text-center py-8 space-y-4">
+                                    <motion.div 
+                                        initial={{ scale: 0 }} 
+                                        animate={{ scale: 1 }} 
+                                        transition={{ type: "spring", bounce: 0.5 }}
+                                        className="w-24 h-24 mx-auto bg-green-100 rounded-full flex items-center justify-center border-4 border-green-400 text-green-500 shadow-[0_0_30px_rgba(74,222,128,0.3)] mb-6"
+                                    >
+                                        <Icon name="check" size={48} />
+                                    </motion.div>
+                                    <h3 className="title-font text-3xl font-extrabold text-pink-950">Order Received! 💖</h3>
+                                    <p className="text-pink-600 font-medium text-lg leading-relaxed max-w-sm mx-auto">
+                                        Your product will be sent as a mega link in a few minutes to <strong className="text-pink-800">@{globalUsername}</strong> {email && <span className="inline">or <strong className="text-pink-800">{email}</strong></span>}. Look out for the notification!
+                                    </p>
+                                    <button 
+                                        onClick={onClose}
+                                        className="mt-8 px-8 py-3 rounded-full bg-pink-100 text-pink-700 font-bold hover:bg-pink-200 transition-colors"
+                                    >
+                                        Close & Continue Browsing
+                                    </button>
+                                </div>
+                            )}
+
+                        </div>
+                    </motion.div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
