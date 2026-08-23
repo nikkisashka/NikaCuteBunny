@@ -97,16 +97,28 @@
                 settings: { storeName: "Nika's Store", currency: "USD" },
                 categories: [{ id: 'cat-1', name: 'Folders' }],
                 products: [
-                    { id: 'prod-1', name: 'NikaCuteBunny Folder = 430 Videos', price: 50, categoryId: 'cat-1', images: ['1.png'] },
-                    { id: 'prod-2', name: 'Nika CuteBunny Folder = 2670 videos', price: 150, categoryId: 'cat-1', images: ['2.png'] },
-                    { id: 'prod-3', name: 'Nika CuteBunny Folder = 7800 videos', price: 340, categoryId: 'cat-1', images: ['3.png'] }
+                    { id: 'prod-1', name: 'NikaCuteBunny Folder = 430 Videos', price: 50, categoryId: 'cat-1', images: ['1'] },
+                    { id: 'prod-2', name: 'Nika CuteBunny Folder = 2670 videos', price: 150, categoryId: 'cat-1', images: ['2'] },
+                    { id: 'prod-3', name: 'Nika CuteBunny Folder = 7800 videos', price: 340, categoryId: 'cat-1', images: ['3'] }
                 ],
                 gateways: [
-                    { id: 'gate-crypto', name: 'Crypto Transfer', type: 'manual', active: true, color: '#f59e0b', details: 'Select a cryptocurrency below to view the address.' },
-                    { id: 'gate-gift', name: 'Binance Gift Card', type: 'giftcard', active: true, color: '#facc15', details: 'Purchase Binance USDT Gift Cards from Eneba.', giftCardLinks: [{ amount: 45, url: 'https://www.eneba.com/us/binance-binance-gift-card-usdt-45-5-usd-key-global' }] }
+                    { 
+                        id: 'gate-crypto', name: 'Crypto Transfer', type: 'manual', active: true, color: '#f59e0b', 
+                        details: 'Send exactly the total amount to one of the addresses below.\nIf your country blocks crypto apps, search YouTube for "How to buy crypto with P2P on Binance".',
+                        cryptoAddresses: [
+                            { coin: 'BTC (Bitcoin)', address: '16dJwZKhN9Pzj46QCaMuEN1yDuXa2iQ1tX' },
+                            { coin: 'BTC (BSC)', address: '0x5cb078849a24732529463c8006dbb2600d28bfab' },
+                            { coin: 'USDT (BSC)', address: '0x5cb078849a24732529463c8006dbb2600d28bfab' }
+                        ]
+                    },
+                    { 
+                        id: 'gate-gift', name: 'Binance Gift Card', type: 'giftcard', active: true, color: '#facc15', 
+                        details: 'Purchase Binance USDT Gift Cards to cover the total amount.', 
+                        giftCardLinks: [{ amount: 45, url: 'https://www.eneba.com/us/binance-binance-gift-card-usdt-45-5-usd-key-global' }] 
+                    }
                 ]
             });
-            const previewVideos = ['11.mp4', '22.mp4', '33.mp4', '44.mp4', '55.mp4'];
+            const previewVideos = ['11', '22', '33', '44', '55.mp4'];
 
             const [activeCategory, setActiveCategory] = useState('all');
             const [checkoutProduct, setCheckoutProduct] = useState(null);
