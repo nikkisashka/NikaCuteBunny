@@ -94,12 +94,12 @@
 
         const App = () => {
             const [data, setData] = useState({
-                settings: { storeName: "Nika's Store", currency: "USD" },
+                settings: { storeName: "NikaCuteBunny", currency: "USD" },
                 categories: [{ id: 'cat-1', name: 'Folders' }],
                 products: [
-                    { id: 'prod-1', name: 'NikaCuteBunny Folder = 430 Videos', price: 50, categoryId: 'cat-1', images: ['1'] },
-                    { id: 'prod-2', name: 'Nika CuteBunny Folder = 2670 videos', price: 150, categoryId: 'cat-1', images: ['2'] },
-                    { id: 'prod-3', name: 'Nika CuteBunny Folder = 7800 videos', price: 340, categoryId: 'cat-1', images: ['3'] }
+                    { id: 'prod-1', name: 'NikaCuteBunny Folder = 430 Videos', price: 50, categoryId: 'cat-1', images: ['1.png'], isActive: true },
+                    { id: 'prod-2', name: 'Nika CuteBunny Folder = 2670 videos', price: 150, categoryId: 'cat-1', images: ['2.png'], isActive: true },
+                    { id: 'prod-3', name: 'Nika CuteBunny Folder = 7800 videos', price: 340, categoryId: 'cat-1', images: ['3.png'], isActive: true }
                 ],
                 gateways: [
                     { 
@@ -308,8 +308,11 @@
                             
                             <div className="flex overflow-x-auto custom-scroll gap-4 pb-4 items-center sm:justify-center">
                                 {previewVideos.map((vid, idx) => (
-                                    <div key={idx} className="video-card bg-black rounded-3xl overflow-hidden shadow-xl border-4 border-white">
-                                        <video src={vid} autoPlay loop muted playsInline className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"></video>
+                                    <div key={idx} className="video-card bg-black rounded-3xl overflow-hidden shadow-xl border-4 border-white shrink-0 relative">
+                                        <video autoPlay loop muted playsInline className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">
+                                            <source src={vid} type="video/mp4" />
+                                            Your browser does not support HTML video.
+                                        </video>
                                     </div>
                                 ))}
                             </div>
